@@ -1,0 +1,70 @@
+version: '3.8'
+services:
+    
+    front:
+        environment: 
+            - VUE_APP_TASKADDRESS=localhost
+            - VUE_APP_ISSUEADDRESS=localhost
+        build: 
+            context: ./front
+            dockerfile: Dockerfile
+        ports:
+            - "8081:8080"
+        depends_on:
+            - issues
+            - tasks
+        networks:
+            - mevn-app
+        volumes:
+            - ./front/src:/app/src
+        
+    issues:
+        environment: 
+            - MONGO_ISSUEADDRESS=testvuedocker_mongoissues_1
+            - MONGO_ISSUEPORT=27017
+        build: 
+            context: ./issues-back
+            dockerfile: Dockerfile
+        ports:
+            - "4000:4000"
+        networks:
+            - mevn-app
+        depends_on:
+          - mongoIssues
+
+    mongoIssues:
+        image: mongo
+        ports:
+          - 27017:27017
+        networks:
+          - mevn-app
+
+
+    tasks:
+
+        environment: 
+            - MONGO_TASKADDRESS=testvuedocker_mongotasks_1
+            - MONGO_TASKPORT=27018
+        build: 
+            context: ./tasks-back
+            dockerfile: Dockerfile
+        ports:
+            - "5000:5000"       
+        networks:
+            - mevn-app
+        depends_on:
+            - mongoTasks
+
+    mongoTasks:
+        image: mongo
+        command: mongod --port 27018
+        ports:
+          - 27018:27018
+        networks:
+          - mevn-app
+
+    
+    
+networks:
+    mevn-app:
+        driver: bridge
